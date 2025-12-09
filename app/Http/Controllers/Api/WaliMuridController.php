@@ -9,21 +9,36 @@ use App\Models\WaliMurid;
 class WaliMuridController extends Controller
 {
     // ============================
-    // 1. CHECK USER (GET)
-    // URL: /api/walimurid/check?email=user@example.com
+    // 1. CHECK USER (POST)
+    // URL: /api/walimurid/check
+    // Body: { "google_token": "..." }
     // ============================
     public function check(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'google_token' => 'required|string',
         ]);
 
-        $wali = WaliMurid::where('email', $request->email)->first();
+        $payload = $this->verifyGoogleToken($request->google_token);
+
+        if (!$payload || is_string($payload)) {
+            return response()->json([
+                'message' => 'Invalid Google Token',
+                'debug' => is_string($payload) ? $payload : 'Verification returned false',
+            ], 401);
+        }
+
+        $email = $payload['email'];
+        $wali = WaliMurid::where('email', $email)->first();
 
         if ($wali) {
+            // Generate token
+            $token = $wali->createToken('auth_token')->plainTextToken;
+
             return response()->json([
                 'message' => 'User ditemukan',
                 'data' => $wali,
+                'token' => $token,
             ], 200);
         }
 
@@ -35,21 +50,85 @@ class WaliMuridController extends Controller
     // ============================
     // 2. REGISTER USER (POST)
     // URL: /api/walimurid/register
+    // Body: { "google_token": "...", "phone": "...", ... }
     // ============================
     public function register(Request $request)
     {
-        $validated = $request->validate([
-            'name'    => 'required|string|max:255',
-            'email'   => 'required|email|unique:wali_murids,email',
-            'phone'   => 'nullable|string|max:20',
+        $request->validate([
+            'google_token' => 'required|string',
+            'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
         ]);
 
-        $wali = WaliMurid::create($validated);
+        $payload = $this->verifyGoogleToken($request->google_token);
+
+        if (!$payload) {
+            return response()->json([
+                'message' => 'Invalid Google Token',
+            ], 401);
+        }
+
+        $email = $payload['email'];
+        $name = $payload['name'];
+
+        // Check if email already exists
+        if (WaliMurid::where('email', $email)->exists()) {
+            return response()->json(['message' => 'Email already registered'], 409);
+        }
+
+        $wali = WaliMurid::create([
+            'name' => $name,
+            'email' => $email,
+            'phone' => $request->phone,
+            'address' => $request->address,
+        ]);
+
+        // Generate token
+        $token = $wali->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'message' => 'User berhasil didaftarkan.',
-            'data'    => $wali,
+            'data' => $wali,
+            'token' => $token,
         ], 201);
+    }
+
+    /**
+     * Verify Google ID Token
+     *
+     * @param string $token
+     * @return array|false|string
+     */
+    private function verifyGoogleToken($token)
+    {
+        try {
+            $clientId = env('GOOGLE_CLIENT_ID');
+            if (!$clientId) {
+                throw new \Exception('GOOGLE_CLIENT_ID not set in .env');
+            }
+
+            $certPath = storage_path('app/cacert.pem');
+            if (!file_exists($certPath)) {
+                throw new \Exception('Certificate file not found at: ' . $certPath);
+            }
+
+            $guzzleClient = new \GuzzleHttp\Client([
+                'verify' => $certPath,
+            ]);
+
+            $client = new \Google\Client(['client_id' => $clientId]);
+            $client->setHttpClient($guzzleClient);
+
+            $payload = $client->verifyIdToken($token);
+            if ($payload) {
+                return $payload;
+            } else {
+                // Verification failed (invalid signature etc)
+                return false;
+            }
+        } catch (\Throwable $e) {
+            // Return error string for debugging
+            return 'Error: ' . $e->getMessage();
+        }
     }
 }
