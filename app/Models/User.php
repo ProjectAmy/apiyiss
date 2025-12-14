@@ -46,4 +46,11 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    /**
+     * Get the walimurid profile associated with the user.
+     */
+    public function walimuridProfile()
+    {
+        return $this->hasOne(WalimuridProfile::class);
+    }
 }
