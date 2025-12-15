@@ -62,6 +62,7 @@ class AuthController extends Controller
     {
         $request->validate([
             'google_token' => 'required|string',
+            'fullname' => 'nullable|string',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
         ]);
@@ -75,7 +76,8 @@ class AuthController extends Controller
         }
 
         $email = $payload['email'];
-        $name = $payload['name'];
+        // Use provided fullname or fallback to Google name
+        $name = $request->fullname ?? $payload['name'];
 
         // Check if email already exists
         if (User::where('email', $email)->exists()) {
@@ -95,7 +97,7 @@ class AuthController extends Controller
         // Create Profile
         $profile = WalimuridProfile::create([
             'user_id' => $user->id,
-            'fullname' => $name, // Use Google name as initial fullname
+            'fullname' => $name,
             'phone' => $request->phone,
             'address' => $request->address,
         ]);
@@ -122,45 +124,44 @@ class AuthController extends Controller
     private function verifyGoogleToken($token)
     {
         // --- TEMPORARY BYPASS FOR TESTING ---
-        // Jika token berisi '@', anggap itu email yang valid
-        if (strpos($token, '@') !== false) {
+        // Jika token adalah string pendek yang mengandung '@' (bukan JWT panjang), anggap itu email.
+        // Ini untuk memudahkan testing manual di Postman tanpa token asli.
+        if (strpos($token, '@') !== false && strlen($token) < 200) {
             return [
                 'email' => $token,
                 'name' => 'Test User (' . $token . ')',
-                'sub' => 'bypass_sub',
+                'sub' => 'bypass_sub_' . $token,
                 'picture' => null,
             ];
         }
 
-        // Default mock user jika token bukan email
-        return [
-            'email' => 'parent@example.com',
-            'name' => 'Parent User',
-            'sub' => 'bypass_sub_default',
-            'picture' => null,
-        ];
-
-        /* 
-        // ORIGINAL GOOGLE VERIFICATION CODE
         try {
             $clientId = env('GOOGLE_CLIENT_ID');
             if (!$clientId) {
+                // If GOOGLE_CLIENT_ID is not set, we can't verify properly.
+                // However, detailed error logs might safely expose this to developer only.
                 throw new \Exception('GOOGLE_CLIENT_ID not set in .env');
             }
 
+            // Path to cacert.pem for local development if needed
             $certPath = storage_path('app/cacert.pem');
-            if (!file_exists($certPath)) {
-                throw new \Exception('Certificate file not found at: ' . $certPath);
+
+            $clientConfig = ['client_id' => $clientId];
+
+            // Use custom Guzzle client with cert ONLY if needed (e.g. local environment issues)
+            // Ideally, production servers have proper CA certs.
+            if (file_exists($certPath)) {
+                $guzzleClient = new \GuzzleHttp\Client([
+                    'verify' => $certPath,
+                ]);
+                $client = new \Google\Client($clientConfig);
+                $client->setHttpClient($guzzleClient);
+            } else {
+                $client = new \Google\Client($clientConfig);
             }
 
-            $guzzleClient = new \GuzzleHttp\Client([
-                'verify' => $certPath,
-            ]);
-
-            $client = new \Google\Client(['client_id' => $clientId]);
-            $client->setHttpClient($guzzleClient);
-
             $payload = $client->verifyIdToken($token);
+
             if ($payload) {
                 return $payload;
             } else {
@@ -171,6 +172,5 @@ class AuthController extends Controller
             // Return error string for debugging
             return 'Error: ' . $e->getMessage();
         }
-        */
     }
 }
