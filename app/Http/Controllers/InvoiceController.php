@@ -11,9 +11,25 @@ class InvoiceController extends Controller
 {
 
 
-    public function index()
+    public function index(Request $request)
     {
-        $invoices = Invoice::all();
+        $user = $request->user();
+
+        // Jika user adalah admin/staff (bukan walimurid), mungkin ingin melihat semua?
+        // Untuk sekarang asumsi ini endpoint khusus walimurid atau handling role user
+
+        if ($user->walimuridProfile) {
+            // Ambil semua student milik user ini
+            $studentIds = $user->walimuridProfile->students->pluck('id');
+
+            // Ambil invoice yang student_id-nya ada di list student user ini
+            $invoices = Invoice::whereIn('student_id', $studentIds)->get();
+        } else {
+            // Fallback, mungkin user belum punya profile atau bukan walimurid
+            // Bisa return kosong atau error, disini kita return kosong saja
+            $invoices = [];
+        }
+
         return response()->json(['data' => $invoices]);
     }
 
