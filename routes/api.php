@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MidtransController;
+use App\Http\Controllers\StudentController;
 
 Route::prefix('auth')->group(function () {
     Route::post('/check', [AuthController::class, 'check']);
@@ -21,3 +22,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/invoices/{id}/snap-token', [InvoiceController::class, 'generateSnapToken']); // returns snap_token
 });
 Route::post('/midtrans/callback', [MidtransController::class, 'callback']); // webhook
+Route::get('/students', [StudentController::class, 'index']);
