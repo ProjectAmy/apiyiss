@@ -62,6 +62,40 @@ class InvoiceController extends Controller
         }
     }
 
+    public function storeBulk(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'description' => 'required|string',
+        ]);
+
+        $students = \App\Models\Student::all();
+        $createdCount = 0;
+
+        // Gunakan transaction biar aman kalau ada error di tengah jalan
+        \Illuminate\Support\Facades\DB::transaction(function () use ($students, $request, &$createdCount) {
+            foreach ($students as $student) {
+                // Generate unique order_id per invoice
+                // Format: INV-{timestamp}-{student_id}-{random}
+                $orderId = 'INV-' . time() . '-' . $student->id . '-' . rand(100, 999);
+
+                Invoice::create([
+                    'order_id' => $orderId,
+                    'student_id' => $student->id,
+                    'amount' => $request->amount,
+                    'description' => $request->description,
+                    'status' => 'UNPAID'
+                ]);
+                $createdCount++;
+            }
+        });
+
+        return response()->json([
+            'message' => "Successfully created invoice for {$createdCount} students",
+            'count' => $createdCount
+        ], 201);
+    }
+
     public function show($id)
     {
         $invoice = Invoice::find($id);

@@ -23,3 +23,4 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::post('/midtrans/callback', [MidtransController::class, 'callback']); // webhook
 Route::get('/students', [StudentController::class, 'index']);
+Route::post('/invoices/bulk', [InvoiceController::class, 'storeBulk']); // admin create invoice bulk
