@@ -152,4 +152,10 @@ class InvoiceController extends Controller
         }
     }
 
+    public function adminIndex()
+    {
+        $invoices = Invoice::with(['student.walimuridProfile'])->get();
+        return response()->json(['data' => $invoices]);
+    }
+
 }
