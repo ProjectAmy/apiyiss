@@ -46,7 +46,7 @@ class BulkInvoiceTest extends TestCase
 
         // 2. Act: Call the endpoint
         $response = $this->actingAs($admin)
-            ->postJson('/api/invoices/bulk', [
+            ->postJson('/api/keuangan/invoices/bulk', [
                 'amount' => 150000,
                 'description' => 'SPP Bulan Januari 2025'
             ]);  // 3. Assert

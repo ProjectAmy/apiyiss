@@ -16,12 +16,19 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
-    Route::get('/invoices', [InvoiceController::class, 'index']); // list invoices for user
-    Route::post('/invoices', [InvoiceController::class, 'store']); // admin create invoice
-    Route::get('/invoices/{id}', [InvoiceController::class, 'show']);
-    Route::post('/invoices/{id}/snap-token', [InvoiceController::class, 'generateSnapToken']); // returns snap_token
+    // Walli routes
+    Route::prefix('wali')->group(function () {
+        Route::get('/invoices', [InvoiceController::class, 'index']); // list invoices for user
+        Route::get('/invoices/{id}', [InvoiceController::class, 'show']);
+        Route::post('/invoices/{id}/snap-token', [InvoiceController::class, 'generateSnapToken']); // returns snap_token
+    });
+
+    // Keuangan routes
+    Route::prefix('keuangan')->group(function () {
+        Route::post('/invoices/create', [InvoiceController::class, 'store']); // admin create invoice
+        Route::post('/invoices/bulk', [InvoiceController::class, 'storeBulk']); // admin create invoice bulk
+        Route::get('/invoices/list', [InvoiceController::class, 'adminIndex']); // admin view all invoices
+        Route::get('/students', [StudentController::class, 'index']);
+    });
 });
 Route::post('/midtrans/callback', [MidtransController::class, 'callback']); // webhook
-Route::get('/students', [StudentController::class, 'index']);
-Route::post('/invoices/bulk', [InvoiceController::class, 'storeBulk']); // admin create invoice bulk
-Route::get('/admin/invoices', [InvoiceController::class, 'adminIndex']); // admin view all invoices
