@@ -115,6 +115,56 @@ class AuthController extends Controller
         ], 201);
     }
 
+    // ============================
+    // 3. CHECK KEUANGAN (POST)
+    // URL: /api/keuangan/auth/check
+    // Body: { "google_token": "..." }
+    // ============================
+    public function checkKeuangan(Request $request)
+    {
+        $request->validate([
+            'google_token' => 'required|string',
+        ]);
+
+        $payload = $this->verifyGoogleToken($request->google_token);
+
+        if (!$payload || is_string($payload)) {
+            return response()->json([
+                'message' => 'Invalid Google Token',
+                'debug' => is_string($payload) ? $payload : 'Verification returned false',
+            ], 401);
+        }
+
+        $email = $payload['email'];
+        $user = User::where('email', $email)->first();
+
+        if ($user) {
+            // Check if user has role 'Staff Keuangan'
+            if (!$user->hasRole('Staff Keuangan')) {
+                return response()->json([
+                    'message' => 'Unauthorized. You are not Staff Keuangan.',
+                ], 403);
+            }
+
+            // Generate token
+            $token = $user->createToken('auth_token')->plainTextToken;
+            $roles = $user->getRoleNames();
+            // Optional: Load specific staff profile if exists in future
+            // $user->load('staffProfile');
+
+            return response()->json([
+                'message' => 'Staff Keuangan found',
+                'user' => $user,
+                'roles' => $roles,
+                'token' => $token,
+            ], 200);
+        }
+
+        return response()->json([
+            'message' => 'User not found',
+        ], 404);
+    }
+
     /**
      * Verify Google ID Token
      *
