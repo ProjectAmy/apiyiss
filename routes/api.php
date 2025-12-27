@@ -6,9 +6,9 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\StudentController;
 
-Route::prefix('auth')->group(function () {
-    Route::post('/check', [AuthController::class, 'check']);
-    Route::post('/register', [AuthController::class, 'register']);
+Route::prefix('wali')->group(function () {
+    Route::post('/auth/check', [AuthController::class, 'check']);
+    Route::post('/auth/register', [AuthController::class, 'register']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -31,4 +31,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/students', [StudentController::class, 'index']);
     });
 });
+
+Route::post('/keuangan/auth/check', [AuthController::class, 'checkKeuangan']);
 Route::post('/midtrans/callback', [MidtransController::class, 'callback']); // webhook
