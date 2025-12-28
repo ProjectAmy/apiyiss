@@ -18,7 +18,7 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
-    // Walli routes
+    // Wali routes
     Route::prefix('wali')->group(function () {
         Route::get('/invoices', [InvoiceController::class, 'index']); // list invoices for user
         Route::get('/invoices/{id}', [InvoiceController::class, 'show']);
