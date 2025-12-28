@@ -14,6 +14,7 @@ class Student extends Model
         'fullname',
         'nis',
         'unit',
+        'grade',
     ];
 
     public function walimuridProfile()

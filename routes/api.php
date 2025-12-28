@@ -21,6 +21,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/invoices', [InvoiceController::class, 'index']); // list invoices for user
         Route::get('/invoices/{id}', [InvoiceController::class, 'show']);
         Route::post('/invoices/{id}/snap-token', [InvoiceController::class, 'generateSnapToken']); // returns snap_token
+        Route::get('/students', [StudentController::class, 'getByWali']);
     });
 
     // Keuangan routes

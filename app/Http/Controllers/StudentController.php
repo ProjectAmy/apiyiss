@@ -12,4 +12,17 @@ class StudentController extends Controller
         $students = Student::select('id', 'fullname')->get();
         return response()->json($students);
     }
+
+    public function getByWali(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user->walimuridProfile) {
+            return response()->json(['message' => 'User is not a Wali Murid'], 403);
+        }
+
+        $students = $user->walimuridProfile->students;
+
+        return response()->json($students);
+    }
 }
