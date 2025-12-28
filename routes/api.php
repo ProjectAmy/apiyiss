@@ -11,6 +11,8 @@ Route::prefix('wali')->group(function () {
     Route::post('/auth/register', [AuthController::class, 'register']);
 });
 
+Route::post('/keuangan/auth/check', [AuthController::class, 'checkKeuangan']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', function (\Illuminate\Http\Request $request) {
         return $request->user();
@@ -33,5 +35,4 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
-Route::post('/keuangan/auth/check', [AuthController::class, 'checkKeuangan']);
 Route::post('/midtrans/callback', [MidtransController::class, 'callback']); // webhook

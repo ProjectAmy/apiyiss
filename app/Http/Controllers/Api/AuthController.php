@@ -176,7 +176,10 @@ class AuthController extends Controller
         // --- TEMPORARY BYPASS FOR TESTING ---
         // Jika token adalah string pendek yang mengandung '@' (bukan JWT panjang), anggap itu email.
         // Ini untuk memudahkan testing manual di Postman tanpa token asli.
-        if (strpos($token, '@') !== false && strlen($token) < 200) {
+        // Check environment AND explicit bypass flag (default to true in local/testing)
+        $shouldBypass = app()->environment(['local', 'testing']) && env('GOOGLE_AUTH_BYPASS', true);
+
+        if ($shouldBypass && strpos($token, '@') !== false && strlen($token) < 200) {
             return [
                 'email' => $token,
                 'name' => 'Test User (' . $token . ')',
