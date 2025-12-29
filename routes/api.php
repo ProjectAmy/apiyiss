@@ -44,8 +44,16 @@ Route::middleware('auth:sanctum')->group(function () {
     // Admin routes
     Route::prefix('admin')->group(function () {
         Route::get('/stats', [AdminController::class, 'stats']);
+        Route::get('/students', [StudentController::class, 'adminList']);
     });
 });
 
-// midtrans route
-Route::post('/midtrans/callback', [MidtransController::class, 'callback']); // webhook
+
+// Fallback login route to prevent 500 error when middleware redirects
+Route::get('/login', function () {
+    return response()->json(['message' => 'Unauthenticated.'], 401);
+})->name('login');
+
+
+//nyoba
+// Route::get('admin/students', [StudentController::class, 'adminList']);

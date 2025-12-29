@@ -26,4 +26,10 @@ class StudentController extends Controller
 
         return response()->json($students);
     }
+
+    public function adminList()
+    {
+        $students = Student::with('walimuridProfile')->get();
+        return response()->json($students);
+    }
 }
