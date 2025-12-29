@@ -31,8 +31,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/invoices/create', [InvoiceController::class, 'store']); // admin create invoice
         Route::post('/invoices/bulk', [InvoiceController::class, 'storeBulk']); // admin create invoice bulk
         Route::get('/invoices/list', [InvoiceController::class, 'adminIndex']); // admin view all invoices
+        Route::post('/invoices/{id}/snap-token', [InvoiceController::class, 'generateSnapToken']); // admin bayar invoice
         Route::get('/students', [StudentController::class, 'index']);
     });
 });
-// Route::get('/keuangan/students', [StudentController::class, 'index']);
 Route::post('/midtrans/callback', [MidtransController::class, 'callback']); // webhook
