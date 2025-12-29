@@ -32,4 +32,22 @@ class StudentController extends Controller
         $students = Student::with('walimuridProfile')->get();
         return response()->json($students);
     }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'fullname' => 'required|string|max:255',
+            'walimurid_profile_id' => 'required|exists:walimurid_profiles,id',
+            'nis' => 'required|string|max:50', // Assuming NIS is string
+            'unit' => 'required|string|max:50',
+            'grade' => 'required|string|max:50', // 'Kelas' mapped to 'grade'
+        ]);
+
+        $student = Student::create($validated);
+
+        return response()->json([
+            'message' => 'Student created successfully',
+            'data' => $student
+        ], 201);
+    }
 }

@@ -45,6 +45,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('admin')->group(function () {
         Route::get('/stats', [AdminController::class, 'stats']);
         Route::get('/students', [StudentController::class, 'adminList']);
+        Route::post('/students', [StudentController::class, 'store']); // Create student
+        Route::get('/walimurid', [AdminController::class, 'listWalimurid']); // List for dropdown
     });
 });
 

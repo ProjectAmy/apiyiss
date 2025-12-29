@@ -20,4 +20,12 @@ class AdminController extends Controller
             'total_wali_murid' => $waliCount,
         ]);
     }
+
+    public function listWalimurid()
+    {
+        // Return id and fullname from WalimuridProfile for the dropdown
+        // Assuming we want all profiles. If needed, we can filter or search here too.
+        $walimurids = \App\Models\WalimuridProfile::select('id', 'fullname')->get();
+        return response()->json($walimurids);
+    }
 }
