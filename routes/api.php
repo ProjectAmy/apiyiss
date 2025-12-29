@@ -6,12 +6,17 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\StudentController;
 
+// login wali
 Route::prefix('wali')->group(function () {
     Route::post('/auth/check', [AuthController::class, 'check']);
     Route::post('/auth/register', [AuthController::class, 'register']);
 });
 
+// login keuangan
 Route::post('/keuangan/auth/check', [AuthController::class, 'checkKeuangan']);
+
+// login admin
+Route::post('/admin/auth/check', [AuthController::class, 'checkAdmin']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', function (\Illuminate\Http\Request $request) {
@@ -35,4 +40,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/students', [StudentController::class, 'index']);
     });
 });
+
+// midtrans route
 Route::post('/midtrans/callback', [MidtransController::class, 'callback']); // webhook

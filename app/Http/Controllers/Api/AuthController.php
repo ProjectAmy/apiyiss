@@ -165,6 +165,54 @@ class AuthController extends Controller
         ], 404);
     }
 
+    // ============================
+    // 4. CHECK ADMIN (POST)
+    // URL: /api/admin/auth/check
+    // Body: { "google_token": "..." }
+    // ============================
+    public function checkAdmin(Request $request)
+    {
+        $request->validate([
+            'google_token' => 'required|string',
+        ]);
+
+        $payload = $this->verifyGoogleToken($request->google_token);
+
+        if (!$payload || is_string($payload)) {
+            return response()->json([
+                'message' => 'Invalid Google Token',
+                'debug' => is_string($payload) ? $payload : 'Verification returned false',
+            ], 401);
+        }
+
+        $email = $payload['email'];
+        $user = User::where('email', $email)->first();
+
+        if ($user) {
+            // Check if user has role 'Admin' (or 'admin' for compatibility)
+            if (!$user->hasRole(['Admin', 'admin'])) {
+                return response()->json([
+                    'message' => 'Unauthorized. You are not an Admin.',
+                ], 403);
+            }
+
+            // Generate token
+            $token = $user->createToken('auth_token')->plainTextToken;
+            $roles = $user->getRoleNames();
+
+            return response()->json([
+                'message' => 'Admin found',
+                'user' => $user,
+                'roles' => $roles,
+                'token' => $token,
+            ], 200);
+        }
+
+        return response()->json([
+            'message' => 'User not found',
+        ], 404);
+    }
+
     /**
      * Verify Google ID Token
      *
