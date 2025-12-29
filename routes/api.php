@@ -2,9 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\InvoiceController;
-use App\Http\Controllers\MidtransController;
-use App\Http\Controllers\StudentController;
+use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\Api\MidtransController;
+use App\Http\Controllers\Api\StudentController;
+use App\Http\Controllers\Api\AdminController;
 
 // login wali
 Route::prefix('wali')->group(function () {
@@ -38,6 +39,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/invoices/list', [InvoiceController::class, 'adminIndex']); // admin view all invoices
         Route::post('/invoices/{id}/snap-token', [InvoiceController::class, 'generateSnapToken']); // admin bayar invoice
         Route::get('/students', [StudentController::class, 'index']);
+    });
+
+    // Admin routes
+    Route::prefix('admin')->group(function () {
+        Route::get('/stats', [AdminController::class, 'stats']);
     });
 });
 
