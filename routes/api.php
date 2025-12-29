@@ -34,5 +34,5 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/students', [StudentController::class, 'index']);
     });
 });
-
+// Route::get('/keuangan/students', [StudentController::class, 'index']);
 Route::post('/midtrans/callback', [MidtransController::class, 'callback']); // webhook
