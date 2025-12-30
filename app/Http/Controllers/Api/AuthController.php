@@ -63,6 +63,8 @@ class AuthController extends Controller
         $request->validate([
             'google_token' => 'required|string',
             'fullname' => 'nullable|string',
+            'shortname' => 'nullable|string',
+            'call_name' => 'nullable|string',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
         ]);
@@ -98,6 +100,8 @@ class AuthController extends Controller
         $profile = WalimuridProfile::create([
             'user_id' => $user->id,
             'fullname' => $name,
+            'shortname' => $request->shortname,
+            'call_name' => $request->call_name,
             'phone' => $request->phone,
             'address' => $request->address,
         ]);

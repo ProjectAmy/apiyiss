@@ -12,6 +12,8 @@ class WalimuridProfile extends Model
     protected $fillable = [
         'user_id',
         'fullname',
+        'shortname',
+        'call_name',
         'phone',
         'address',
     ];
