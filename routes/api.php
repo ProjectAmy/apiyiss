@@ -60,5 +60,4 @@ Route::get('/login', function () {
 })->name('login');
 
 
-//nyoba
-// Route::get('admin/students', [StudentController::class, 'adminList']);
+
