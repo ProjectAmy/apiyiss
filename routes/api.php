@@ -19,6 +19,9 @@ Route::post('/keuangan/auth/check', [AuthController::class, 'checkKeuangan']);
 // login admin
 Route::post('/admin/auth/check', [AuthController::class, 'checkAdmin']);
 
+// midtrans webhook
+Route::post('/midtrans/callback', [MidtransController::class, 'callback']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', function (\Illuminate\Http\Request $request) {
         return $request->user();
