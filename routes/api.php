@@ -53,6 +53,10 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
+// test API
+Route::get('/test', function () {
+    return response()->json(['message' => 'Test API']);
+});
 
 // Fallback login route to prevent 500 error when middleware redirects
 Route::get('/login', function () {
