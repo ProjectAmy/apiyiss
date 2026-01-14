@@ -102,7 +102,7 @@ class AuthController extends Controller
             'fullname' => $name,
             'shortname' => $request->shortname,
             'call_name' => $request->call_name,
-            'phone' => $request->phone,
+            'phone' => $this->formatPhoneNumber($request->phone),
             'address' => $request->address,
         ]);
 
@@ -277,5 +277,30 @@ class AuthController extends Controller
             // Return error string for debugging
             return 'Error: ' . $e->getMessage();
         }
+    }
+
+    /**
+     * Format phone number to start with 62
+     */
+    private function formatPhoneNumber($phone)
+    {
+        if (empty($phone)) {
+            return null;
+        }
+
+        // Remove all non-numeric characters
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+
+        // If starts with 0, replace with 62
+        if (strpos($phone, '0') === 0) {
+            $phone = '62' . substr($phone, 1);
+        }
+
+        // If starts with 8, prepend 62 (handling cases where user enters 812...)
+        if (strpos($phone, '8') === 0) {
+            $phone = '62' . $phone;
+        }
+
+        return $phone;
     }
 }
