@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\WalimuridProfile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Firebase\JWT\JWT;
 
 class AuthController extends Controller
 {
@@ -264,6 +265,9 @@ class AuthController extends Controller
             } else {
                 $client = new \Google\Client($clientConfig);
             }
+
+            // Fix for clock skew: "Cannot handle token with iat prior to..."
+            JWT::$leeway = 60;
 
             $payload = $client->verifyIdToken($token);
 
