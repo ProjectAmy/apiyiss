@@ -48,6 +48,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('admin')->group(function () {
         Route::get('/stats', [AdminController::class, 'stats']);
         Route::get('/students', [StudentController::class, 'adminList']);
+        Route::get('/students/unconnected', [StudentController::class, 'getUnconnected']); // Unconnected students
+        Route::post('/students/connect', [StudentController::class, 'connectWali']); // Connect student to wali
         Route::post('/students', [StudentController::class, 'store']); // Create student
         Route::get('/walimurid', [AdminController::class, 'listWalimurid']); // List for dropdown
     });

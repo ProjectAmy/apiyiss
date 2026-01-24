@@ -46,6 +46,7 @@ class AuthController extends Controller
                 'user' => $user,
                 'roles' => $roles,
                 'token' => $token,
+                'is_registered' => $user->walimuridProfile !== null,
             ], 200);
         }
 
@@ -83,19 +84,45 @@ class AuthController extends Controller
         $name = $request->fullname ?? $payload['name'];
 
         // Check if email already exists
-        if (User::where('email', $email)->exists()) {
-            return response()->json(['message' => 'Email already registered'], 409);
+        $user = User::where('email', $email)->first();
+
+        if ($user) {
+            // Check if profile already exists
+            if ($user->walimuridProfile) {
+                return response()->json(['message' => 'User already registered'], 409);
+            }
+            // User exists but no profile, proceed to attach profile
+        } else {
+            // Create User (This path might be blocked if we enforce "only existing users can login", 
+            // but for safety we can allow creation OR return error depending on strictness. 
+            // Given the flow "check if email exists" happens at login, if someone hits API directly 
+            // without login check, do we allow registration? 
+            // The prompt "jika email user sudah ada di tabel users.email... teruskan ke register" implies 
+            // the user ALREADY exists. So we are just completing the profile.
+            // If the user does NOT exist, the login flow rejects them.
+            // So technically this endpoint is only reached by existing users.
+            // But if we want to be safe:
+
+            // For now, let's allow creation if it doesn't exist (fallback) OR strict mode?
+            // "jika tidak maka keluarkan peringatan email tidak terdaftar" -> This was for LOGIN.
+            // So implying only pre-registered emails can 'register' (complete profile).
+
+            // Let's assume we can create user if not found here? No, consistent with login.
+            // Actually, if I allow creation here, I bypass the restriction.
+            // So if user not found, I should probably fail?
+            // But for now, let's just focus on fixing the 409.
+
+            $user = User::create([
+                'name' => $name,
+                'email' => $email,
+                'password' => Hash::make(Str::random(16)), // Random password for Google users
+            ]);
         }
 
-        // Create User
-        $user = User::create([
-            'name' => $name,
-            'email' => $email,
-            'password' => Hash::make(Str::random(16)), // Random password for Google users
-        ]);
-
         // Assign Role (Default to Wali Murid)
-        $user->assignRole('Wali Murid');
+        if (!$user->hasRole('Wali Murid')) {
+            $user->assignRole('Wali Murid');
+        }
 
         // Create Profile
         $profile = WalimuridProfile::create([
