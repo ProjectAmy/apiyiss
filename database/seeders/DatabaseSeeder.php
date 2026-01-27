@@ -19,9 +19,11 @@ class DatabaseSeeder extends Seeder
 
         $this->call(RoleSeeder::class);
 
-        User::factory()->create([
+        User::create([
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            'email_verified_at' => now(),
         ]);
     }
 }
