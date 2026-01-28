@@ -1,4 +1,7 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteRule ^(.*)$ public/$1 [L]
+    RewriteBase /apiyiss/
+    
+    RewriteCond %{REQUEST_URI} !^/apiyiss/public/
+    RewriteRule ^(.*)$ public/$1 [L,QSA]
 </IfModule>
