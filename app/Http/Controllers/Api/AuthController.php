@@ -269,7 +269,7 @@ class AuthController extends Controller
         }
 
         try {
-            $clientId = env('GOOGLE_CLIENT_ID');
+            $clientId = config('services.google.client_id');
             if (!$clientId) {
                 // If GOOGLE_CLIENT_ID is not set, we can't verify properly.
                 // However, detailed error logs might safely expose this to developer only.
