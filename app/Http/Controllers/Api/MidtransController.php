@@ -21,7 +21,17 @@ class MidtransController extends Controller
 
         $serverKey = config('midtrans.server_key');
 
+        // Midtrans signature: sha512(order_id + status_code + gross_amount + server_key)
+        // Note: gross_amount for signature calculation should match the precision sent by Midtrans (usually string)
         $generatedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+
+        if ($generatedSignature !== $signatureKey) {
+            // Try again with integer grossAmount if there was decimal
+            if (str_contains($grossAmount, '.')) {
+                $intAmount = (int) $grossAmount;
+                $generatedSignature = hash('sha512', $orderId . $statusCode . $intAmount . $serverKey);
+            }
+        }
 
         if ($generatedSignature !== $signatureKey) {
             Log::warning('Midtrans signature mismatch', $payload);
