@@ -138,7 +138,7 @@ class InvoiceController extends Controller
                     'id' => $invoice->id,
                     'price' => (int) $invoice->amount,
                     'quantity' => 1,
-                    'name' => $invoice->description . ' - ' . ($student->fullname ?? 'Siswa'),
+                    'name' => ($student->fullname ?? 'Siswa') . ' - ' . $invoice->description,
                 ]
             ],
             'customer_details' => [
