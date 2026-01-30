@@ -133,10 +133,24 @@ class InvoiceController extends Controller
                 'order_id' => $invoice->order_id,
                 'gross_amount' => (int) $invoice->amount,
             ],
+            'item_details' => [
+                [
+                    'id' => $invoice->id,
+                    'price' => (int) $invoice->amount,
+                    'quantity' => 1,
+                    'name' => $invoice->description,
+                ]
+            ],
             'customer_details' => [
                 'first_name' => $profile->fullname ?? ($user->name ?? 'Wali Murid'),
                 'email' => $user->email ?? '',
                 'phone' => $profile->phone ?? '',
+                'billing_address' => [
+                    'first_name' => $profile->fullname ?? ($user->name ?? 'Wali Murid'),
+                    'email' => $user->email ?? '',
+                    'phone' => $profile->phone ?? '',
+                    'address' => $profile->address ?? '',
+                ],
             ],
         ];
 
