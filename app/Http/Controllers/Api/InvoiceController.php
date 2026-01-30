@@ -110,12 +110,10 @@ class InvoiceController extends Controller
 
     public function generateSnapToken($id)
     {
-        $invoice = Invoice::findOrFail($id);
-
-        // Jika sudah ada snap_token dan belum expire, boleh return yang sudah ada
-        if ($invoice->snap_token) {
-            return response()->json(['snap_token' => $invoice->snap_token]);
-        }
+        $invoice = Invoice::with('student.walimuridProfile.user')->findOrFail($id);
+        $student = $invoice->student;
+        $profile = $student ? $student->walimuridProfile : null;
+        $user = $profile ? $profile->user : null;
 
         // set midtrans config
         Config::$serverKey = config('midtrans.server_key');
@@ -133,11 +131,12 @@ class InvoiceController extends Controller
         $params = [
             'transaction_details' => [
                 'order_id' => $invoice->order_id,
-                'gross_amount' => $invoice->amount,
+                'gross_amount' => (int) $invoice->amount,
             ],
             'customer_details' => [
-                'first_name' => 'Wali', // isi sesuai data
-                'email' => 'parent@example.com'
+                'first_name' => $profile->fullname ?? ($user->name ?? 'Wali Murid'),
+                'email' => $user->email ?? '',
+                'phone' => $profile->phone ?? '',
             ],
         ];
 
